@@ -32,7 +32,11 @@ class _LoginOptionsPageState extends State<LoginOptionsPage> {
                 },
                 child: loginOption(
                     'Cedula y Contrasenia', Icon(Icons.people), size)),
-            loginOption('Biometrico', Icon(Icons.face), size)
+            InkWell(
+                onTap: () {
+                  Navigator.pushNamed(context, '/residenthome');
+                },
+                child: loginOption('Biometrico', Icon(Icons.face), size))
           ],
         ),
       ),

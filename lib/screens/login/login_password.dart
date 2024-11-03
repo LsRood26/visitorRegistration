@@ -49,8 +49,8 @@ class _LoginPageState extends State<LoginPasswordPage> {
               ),
               child: TextButton(
                 onPressed: () {
-                  Navigator.pushNamed(context, '/residenthome');
-                  //Navigator.pushNamed(context, '/visitorhome');
+                  //Navigator.pushNamed(context, '/residenthome');
+                  Navigator.pushNamed(context, '/visitorhome');
                 },
                 child: Text(
                   'Iniciar Sesion',

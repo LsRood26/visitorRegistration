@@ -72,19 +72,22 @@ class _ResidentHomeState extends State<ResidentHome>
           SizedBox(
             height: size.height * 0.03,
           ),
-          registervisits(size, _tabController),
+          registervisitors(size, _tabController),
         ],
       ),
     );
   }
 }
 
-Widget registervisits(Size size, TabController controller) {
+Widget registervisitors(Size size, TabController controller) {
   return Column(
     children: [
       Container(
         width: size.width * 1,
         child: TabBar(
+          labelColor: Colors.purple,
+          dividerColor: Colors.purple,
+          indicatorColor: Colors.purple,
           controller: controller,
           tabs: const [
             Tab(
@@ -123,14 +126,14 @@ Widget registervisits(Size size, TabController controller) {
               child: ListView.builder(
                   itemCount: 7,
                   itemBuilder: (context, index) {
-                    return pendingvisits(size, context);
+                    return pendingvisitors(size, context);
                   }),
             ),
             Center(
               child: ListView.builder(
                   itemCount: 7,
                   itemBuilder: (context, index) {
-                    return previousvisits(size, context);
+                    return previousvisitors(size, context);
                   }),
             ),
           ],
@@ -140,7 +143,7 @@ Widget registervisits(Size size, TabController controller) {
   );
 }
 
-Widget pendingvisits(Size size, BuildContext context) {
+Widget pendingvisitors(Size size, BuildContext context) {
   return GestureDetector(
     onTap: () {
       showPendingVisits(context, size);
@@ -159,7 +162,7 @@ Widget pendingvisits(Size size, BuildContext context) {
   );
 }
 
-Widget previousvisits(Size size, BuildContext context) {
+Widget previousvisitors(Size size, BuildContext context) {
   return GestureDetector(
     onTap: () {
       print('Informacion de la visita previa der John');
