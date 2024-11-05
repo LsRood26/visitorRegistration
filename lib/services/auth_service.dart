@@ -6,10 +6,9 @@ import 'package:provider/provider.dart';
 import 'package:visitorregistration/providers/provider_login.dart';
 
 class AuthService {
-  //final String baseUrl = 'http://localhost:3000';
   final storage = FlutterSecureStorage();
 
-  Future<void> login(String dni, int password, BuildContext context) async {
+  Future<void> login(String dni, String password, BuildContext context) async {
     final provider = Provider.of<ProviderLogin>(context, listen: false);
     final url = Uri.parse('http://10.0.2.2:3000/auth/login');
 
@@ -27,9 +26,15 @@ class AuthService {
       if (response.statusCode == 200 || response.statusCode == 201) {
         print('respuesta: ${response.body}');
         final responseData = json.decode(response.body);
-        print('Token: ${responseData["acces_token"]}');
-        final token = responseData['acces_token'];
-        await storage.write(key: 'acces_token', value: token);
+        print('Token: ${responseData["access_token"]}');
+        final token = responseData['access_token'];
+        //await storage.write(key: 'acces_token', value: token);
+        await provider.saveToken(token);
+        provider.dni = responseData["dni"];
+        provider.name = responseData["name"];
+        provider.lastname = responseData["lastname"];
+        provider.roleId = responseData["role"]["id"];
+        provider.role = responseData["role"]["name"];
         provider.cleanInputs();
         Navigator.pushReplacementNamed(context, '/residenthome');
       } else {
@@ -42,7 +47,7 @@ class AuthService {
   }
 
   Future<void> logout(BuildContext context) async {
-    await storage.delete(key: 'acces_token');
+    await storage.delete(key: 'access_token');
     Navigator.pushReplacementNamed(context, '/');
   }
 }

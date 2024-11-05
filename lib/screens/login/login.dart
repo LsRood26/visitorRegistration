@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:visitorregistration/services/auth_service.dart';
 
 class LoginOptionsPage extends StatefulWidget {
   const LoginOptionsPage({super.key});
@@ -21,24 +20,12 @@ class _LoginOptionsPageState extends State<LoginOptionsPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            Column(
-              children: [
-                Icon(Icons.location_city),
-                Text('Urbanización Denme Chamba'),
-              ],
-            ),
             InkWell(
                 onTap: () {
-                  //Navigator.pushNamed(context, '/residenthome');
                   Navigator.pushNamed(context, '/loginpassword');
                 },
-                child: loginOption(
-                    'Cedula y Contrasenia', Icon(Icons.people), size)),
-            InkWell(
-                onTap: () {
-                  Navigator.pushNamed(context, '/residenthome');
-                },
-                child: loginOption('Biometrico', Icon(Icons.face), size))
+                child: loginOption('Ingreso con Cedula y Contraseña',
+                    Icon(Icons.people), size)),
           ],
         ),
       ),

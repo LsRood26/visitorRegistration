@@ -28,7 +28,7 @@ class _LoginPageState extends State<LoginPasswordPage> {
             Column(
               children: [
                 Icon(Icons.ac_unit_sharp),
-                Text('Urbanización Denme Chamba'),
+                Text('Urbanización'),
               ],
             ),
             Container(
@@ -56,7 +56,7 @@ class _LoginPageState extends State<LoginPasswordPage> {
                     isLoading = true;
                   });
                   service.login(provider.dniController.text,
-                      int.parse(provider.passwordController.text), context);
+                      provider.passwordController.text, context);
                   setState(() {
                     isLoading = false;
                   });
