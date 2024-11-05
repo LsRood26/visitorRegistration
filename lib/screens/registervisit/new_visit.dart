@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
+import 'package:visitorregistration/providers/provider_login.dart';
 import 'dart:io';
 
-enum MetodoIngreso { caminando, vehiculo }
+import 'package:visitorregistration/providers/provider_visits.dart';
+
+enum MetodoIngreso { walk, car }
 
 class NewVisit extends StatefulWidget {
   const NewVisit({super.key});
@@ -12,67 +16,81 @@ class NewVisit extends StatefulWidget {
 }
 
 class _NewVisitState extends State<NewVisit> {
-  MetodoIngreso? _metodoSeleccionado = MetodoIngreso.caminando;
-  File? _image;
-
-  Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      setState(() {
-        _image = File(pickedFile.path);
-      });
-    }
-  }
+  MetodoIngreso? _metodoSeleccionado = MetodoIngreso.walk;
 
   @override
   Widget build(BuildContext context) {
-    String usertype = 'visitante';
+    //String usertype = 'visitante';
+    String entry = "";
     final size = MediaQuery.of(context).size;
+    ProviderRequests provider = Provider.of<ProviderRequests>(context);
+    ProviderLogin providerauth = Provider.of<ProviderLogin>(context);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
+        leading: IconButton(
+          onPressed: () {
+            provider.request = null;
+            Navigator.of(context).pop();
+            provider.cleanInputs();
+          },
+          icon: Icon(Icons.arrow_back_rounded),
+        ),
         backgroundColor: Colors.white,
-        title: Text('Registrar nueva visita'),
+        title: Text(provider.request != null
+            ? 'Editar visita'
+            : 'Registrar nueva visita'),
       ),
       body: Container(
-        height: size.height * 0.75,
+        height: size.height * 0.8,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            dataText(size, 'Nombre y apellido del visitante',
-                'Nombre y apellido del visitante', 0.6),
-            dataText(size, 'Cedula del visitante', 'Cedula del visitante', 0.6),
-            dataText(size, 'Cedula del residente', 'Cedula del residente', 0.6),
+            dataText(size, 'Nombres del visitante', 0.6,
+                provider.nameController, provider),
+            dataText(size, 'Apellidos del visitante', 0.6,
+                provider.lastnameController, provider),
+            dataText(size, 'Cedula del visitante', 0.6,
+                provider.dnivisitorController, provider),
+            dataText(size, 'Cedula del residente', 0.6,
+                provider.dniresidentController, provider),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                dataText(size, 'Manzana del residente', 'Manzana', 0.3),
-                dataText(size, 'Villa del residente', 'Villa', 0.3)
+                dataText(
+                    size, 'Manzana', 0.3, provider.blockController, provider),
+                dataText(size, 'Villa', 0.3, provider.villaController, provider)
               ],
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                TextButton(
-                  onPressed: () {
-                    selectDate(context);
-                  },
-                  child: Container(
-                    padding: EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                        color: Colors.purple,
-                        borderRadius: BorderRadius.circular(12)),
-                    child: Text(
-                      'Fecha de visita',
-                      style: TextStyle(color: Colors.white),
-                    ),
+                Container(
+                  width: size.width * 0.3,
+                  child: TextField(
+                    decoration: InputDecoration(hintText: 'Fecha de visita'),
+                    controller: provider.datevisitController,
+                    readOnly: true,
+                    onTap: () {
+                      selectDate(context, provider);
+                    },
                   ),
                 ),
-                TextButton(
+                Container(
+                  width: size.width * 0.3,
+                  child: TextField(
+                    readOnly: true,
+                    onTap: () {
+                      selectTime(context, provider);
+                    },
+                    decoration: InputDecoration(hintText: 'Hora de visita'),
+                    controller: provider.timevisitController,
+                  ),
+                ),
+                /* TextButton(
                   onPressed: () {
-                    selectTime(context);
+                    selectTime(context, provider);
                   },
                   child: Container(
                       padding: EdgeInsets.all(10),
@@ -83,10 +101,13 @@ class _NewVisitState extends State<NewVisit> {
                         'Hora de visita',
                         style: TextStyle(color: Colors.white),
                       )),
-                ),
+                ), */
               ],
             ),
-            Text('Medio de ingreso'),
+            Text(
+              'Medio de ingreso',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             Row(
               children: [
                 Container(
@@ -97,7 +118,7 @@ class _NewVisitState extends State<NewVisit> {
                       style: TextStyle(fontSize: size.height * 0.018),
                     ),
                     leading: Radio(
-                        value: MetodoIngreso.caminando,
+                        value: MetodoIngreso.walk,
                         groupValue: _metodoSeleccionado,
                         onChanged: (MetodoIngreso? value) {
                           setState(() {
@@ -115,7 +136,7 @@ class _NewVisitState extends State<NewVisit> {
                       style: TextStyle(fontSize: size.height * 0.018),
                     ),
                     leading: Radio(
-                        value: MetodoIngreso.vehiculo,
+                        value: MetodoIngreso.car,
                         groupValue: _metodoSeleccionado,
                         onChanged: (MetodoIngreso? value) {
                           setState(() {
@@ -127,8 +148,8 @@ class _NewVisitState extends State<NewVisit> {
                 ),
               ],
             ),
-            if (usertype == 'visitante' &&
-                _metodoSeleccionado == MetodoIngreso.vehiculo) ...[
+            if (providerauth.getrole == "visitante" &&
+                _metodoSeleccionado == MetodoIngreso.car) ...[
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -136,13 +157,14 @@ class _NewVisitState extends State<NewVisit> {
                       width: size.width * 0.4,
                       child: Text('Cargar foto de placa de vehiculo')),
                   Container(
+                    height: size.height * 0.05,
                     decoration: BoxDecoration(
                         color: Colors.purple,
                         borderRadius: BorderRadius.circular(8)),
                     child: IconButton(
                       color: Colors.white,
                       onPressed: () {
-                        _pickImage();
+                        _pickImage(provider);
                       },
                       icon: Icon(Icons.add_a_photo),
                     ),
@@ -150,11 +172,14 @@ class _NewVisitState extends State<NewVisit> {
                 ],
               ),
               Container(
+                  margin: EdgeInsets.only(top: 5),
+                  decoration:
+                      BoxDecoration(border: Border.all(color: Colors.purple)),
                   height: size.height * 0.15,
                   width: size.width * 0.5,
-                  child: _image != null
+                  child: provider.image != null
                       ? Image.file(
-                          _image!,
+                          provider.image!,
                           fit: BoxFit.cover,
                         )
                       : Icon(Icons.photo))
@@ -167,31 +192,53 @@ class _NewVisitState extends State<NewVisit> {
         width: size.width * 0.35,
         child: FloatingActionButton(
           backgroundColor: Colors.purple,
-          onPressed: () {
-            //GUARDAR LA INFORMACION
+          onPressed: () async {
+            provider.request = null;
+            if (_metodoSeleccionado == MetodoIngreso.car) {
+              entry = 'car';
+            } else {
+              entry = "walk";
+            }
+
+            await provider.registerVisit(context, provider, entry);
+
+            provider.cleanInputs();
+            provider.fetchRequests(context);
+            Navigator.pop(context, true);
           },
           child: Text(
-            'Registrar visita',
+            provider.request != null ? 'Editar visita' : 'Registrar visita',
             style: TextStyle(color: Colors.white),
           ),
         ),
       ),
     );
   }
+
+  Future<void> _pickImage(ProviderRequests provider) async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      //provider.image = File(pickedFile.path);
+      setState(() {
+        provider.image = File(pickedFile.path);
+      });
+    }
+  }
 }
 
-Widget dataText(Size size, String texto, String hint, double width
-    /* TextEditingController controller */
-    ) {
+Widget dataText(Size size, String hint, double width,
+    TextEditingController controller, ProviderRequests provider) {
   return Container(
-    //color: Colors.amber,
     padding: EdgeInsets.all(8),
     height: size.height * 0.08,
     width: size.width * width,
     child: Column(
       children: [
-        //Text(texto),
         TextField(
+          readOnly: provider.request != null,
+          controller: controller,
           textAlign: TextAlign.center,
           decoration: InputDecoration(hintText: hint),
         ),
@@ -200,25 +247,21 @@ Widget dataText(Size size, String texto, String hint, double width
   );
 }
 
-Future<void> selectDate(BuildContext context) async {
-  //GUARDAR CON PROVIDER
+Future<void> selectDate(BuildContext context, ProviderRequests provider) async {
   final DateTime? pickedDate = await showDatePicker(
-      //locale: ,
-      context: context,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100));
+      context: context, firstDate: DateTime(2000), lastDate: DateTime(2100));
   if (pickedDate != null) {
-    print('Fecha seleccionada: $pickedDate');
+    provider.datevisitController.text =
+        pickedDate.toIso8601String().split('T')[0];
   }
 }
 
-Future<void> selectTime(BuildContext context) async {
-  //GUARDAR CON PROVIDER
+Future<void> selectTime(BuildContext context, ProviderRequests provider) async {
   final TimeOfDay? pickedTime = await showTimePicker(
     context: context,
     initialTime: TimeOfDay.now(),
   );
   if (pickedTime != null) {
-    print('Hora seleccionada: ${pickedTime.format(context)}');
+    provider.timevisitController.text = pickedTime.format(context);
   }
 }

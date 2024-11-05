@@ -1,5 +1,12 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:visitorregistration/models/requests.dart';
+import 'package:visitorregistration/providers/provider_login.dart';
+import 'package:visitorregistration/providers/provider_visits.dart';
+import 'package:visitorregistration/services/auth_service.dart';
 
 class ResidentHome extends StatefulWidget {
   const ResidentHome({super.key});
@@ -16,6 +23,11 @@ class _ResidentHomeState extends State<ResidentHome>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    print('Hola');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<ProviderRequests>(context, listen: false)
+          .fetchRequests(context);
+    });
   }
 
   @override
@@ -24,19 +36,30 @@ class _ResidentHomeState extends State<ResidentHome>
     super.dispose();
   }
 
+  /* @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    print('Hola');
+    Provider.of<ProviderRequests>(context, listen: false)
+        .fetchRequests(context);
+  } */
+
   @override
   Widget build(BuildContext context) {
+    final AuthService service = AuthService();
     final size = MediaQuery.of(context).size;
+    final requestProvider = Provider.of<ProviderRequests>(context);
+    final authprovider = Provider.of<ProviderLogin>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: Text('Bienvenido, John Doe'),
+        title: Text('Bienvenido, ${authprovider.getname}'),
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/');
+                service.logout(context);
               },
               icon: const Icon(Icons.logout))
         ],
@@ -69,17 +92,35 @@ class _ResidentHomeState extends State<ResidentHome>
               ),
             ),
           ),
+          /* IconButton(
+            onPressed: () {
+              requestProvider.fetchRequests(context);
+            },
+            icon: Icon(Icons.abc),
+          ), */
           SizedBox(
             height: size.height * 0.03,
           ),
-          registervisitors(size, _tabController),
+          Container(
+              //color: Colors.amber,
+              height: size.height * 0.75,
+              width: size.width * 1,
+              child: registervisitors(size, _tabController, requestProvider)),
         ],
       ),
     );
   }
 }
 
-Widget registervisitors(Size size, TabController controller) {
+Widget registervisitors(
+    Size size, TabController controller, ProviderRequests provider) {
+  String filterPending = 'pending';
+
+  List<CustomRequests> allRequests = provider.requests;
+  List<CustomRequests> filteredRequests =
+      allRequests.where((request) => request.status == filterPending).toList();
+  List<CustomRequests> remainingRequest =
+      allRequests.where((request) => request.status != filterPending).toList();
   return Column(
     children: [
       Container(
@@ -115,26 +156,96 @@ Widget registervisitors(Size size, TabController controller) {
           ],
         ),
       ),
-      Container(
-        //color: Colors.blue,
-        //width: size.width * 0.9,
-        height: size.height * 0.5,
+      Expanded(
         child: TabBarView(
           controller: controller,
           children: [
-            Center(
-              child: ListView.builder(
-                  itemCount: 7,
-                  itemBuilder: (context, index) {
-                    return pendingvisitors(size, context);
-                  }),
+            Container(
+              //color: Colors.purple,
+              height: size.height * 0.6,
+              child: filteredRequests.isEmpty
+                  ? Center(
+                      child: Text('No tienes visitas pendientes'),
+                    )
+                  : ListView.builder(
+                      itemCount: filteredRequests.length,
+                      itemBuilder: (context, index) {
+                        final request = filteredRequests[index];
+                        return GestureDetector(
+                          onLongPress: () {
+                            print('JOJO');
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: Text(
+                                      'Esta seguro de eliminar la solicitud?'),
+                                  actions: [
+                                    IconButton(
+                                      onPressed: () async {
+                                        await provider.deleteRequest(
+                                            request.id.toString(), context);
+                                        provider.fetchRequests(context);
+                                      },
+                                      icon: Icon(Icons.check),
+                                    ),
+                                    IconButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      icon: Icon(Icons.close),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                          onTap: () {
+                            showDetailsDialog(context, request, size, provider);
+                          },
+                          child: Card(
+                            child: ListTile(
+                              title: Text(
+                                  '${request.visitorName + request.visitorLastname}'),
+                              subtitle: Text('${request.datetime}'),
+                              trailing: GestureDetector(
+                                  onTap: () {
+                                    provider.request = request;
+                                    provider.setRequest();
+                                    Navigator.pushNamed(context, '/newvisit');
+                                    print('Editando');
+                                  },
+                                  child: Icon(Icons.edit)),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
             ),
-            Center(
-              child: ListView.builder(
-                  itemCount: 7,
-                  itemBuilder: (context, index) {
-                    return previousvisitors(size, context);
-                  }),
+            Container(
+              height: size.height * 0.6,
+              child: provider.requests.isEmpty
+                  ? Center(
+                      child: Text('No tienes registros de visitas'),
+                    )
+                  : ListView.builder(
+                      itemCount: remainingRequest.length,
+                      itemBuilder: (context, index2) {
+                        final requestpre = remainingRequest[index2];
+                        return GestureDetector(
+                          onTap: () {
+                            showDetailsDialog(
+                                context, requestpre, size, provider);
+                          },
+                          child: Card(
+                            child: ListTile(
+                              title: Text('${requestpre.visitorName}'),
+                              subtitle: Text('${requestpre.datetime}'),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),
@@ -143,23 +254,91 @@ Widget registervisitors(Size size, TabController controller) {
   );
 }
 
-Widget pendingvisitors(Size size, BuildContext context) {
-  return GestureDetector(
-    onTap: () {
-      showPendingVisits(context, size);
-    },
-    child: Card(
-      child: ListTile(
-        title: Text('Jane Doe'),
-        subtitle: Text('11-1-2024 09:11'),
-        trailing: IconButton(
-            onPressed: () {
-              print('Editando');
-            },
-            icon: Icon(Icons.edit)),
-      ),
-    ),
-  );
+void showDetailsDialog(BuildContext context, CustomRequests request, Size size,
+    ProviderRequests provider) {
+  String base64Image = request.photo;
+  print(' base641 $base64Image');
+  String base64String = base64Image.split(',').last;
+  print(' base642 $base64String');
+  Uint8List bytes = base64Decode(base64String);
+  print('bytes $bytes');
+  showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Detalles de visitante'),
+          content: Container(
+            height: size.height * 0.3,
+            child: Column(
+              children: [
+                Text('${request.visitorName}'),
+                Text('${request.visitorDNI}'),
+                Text('${request.residentDNI}'),
+                Text('${request.datetime}'),
+                Text('${request.transportMode}'),
+                Text('${request.status}'),
+                Image(
+                  image: MemoryImage(bytes),
+                  width: size.width * 0.3,
+                  height: size.height * 0.15,
+                  fit: BoxFit.cover,
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            Text('Aceptar visita?'),
+            IconButton(
+                onPressed: () async {
+                  provider.status = 'accepted';
+                  await provider.updateRequest(provider, context, request);
+                  provider.fetchRequests(context);
+                  Navigator.pop(context);
+                },
+                icon: Icon(Icons.check)),
+            IconButton(
+                onPressed: () async {
+                  provider.status = 'rejected';
+                  await provider.updateRequest(provider, context, request);
+                  provider.fetchRequests(context);
+                  Navigator.pop(context);
+                },
+                icon: Icon(Icons.close))
+          ],
+        );
+      });
+}
+
+Widget pendingvisitors(Size size, BuildContext context, CustomRequests request,
+    ProviderRequests provider) {
+  return FutureBuilder(
+      future: provider.fetchVisitorDetails(context),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return ListTile(
+            title: Text('Cargando detalles'),
+            subtitle: Text('Fecha: ${request.datetime}'),
+          );
+        } else if (snapshot.hasError) {
+          return ListTile(
+            title: Text('Error al cargar los detalles'),
+            subtitle: Text('Fecha: ${request.datetime}'),
+          );
+        } else {
+          final name = snapshot.data!['name']!;
+          final lastname = snapshot.data!['lastname']!;
+
+          return ListTile(
+            title: Text('Visitante: $name $lastname'),
+            subtitle: Text('Fecha: ${request.datetime}'),
+            trailing: IconButton(
+                onPressed: () {
+                  print('Editando');
+                },
+                icon: Icon(Icons.edit)),
+          );
+        }
+      });
 }
 
 Widget previousvisitors(Size size, BuildContext context) {
