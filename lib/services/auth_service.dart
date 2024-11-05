@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
@@ -24,9 +25,7 @@ class AuthService {
         }),
       );
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print('respuesta: ${response.body}');
         final responseData = json.decode(response.body);
-        print('Token: ${responseData["access_token"]}');
         final token = responseData['access_token'];
         //await storage.write(key: 'acces_token', value: token);
         await provider.saveToken(token);
@@ -37,12 +36,19 @@ class AuthService {
         provider.role = responseData["role"]["name"];
         provider.cleanInputs();
         Navigator.pushReplacementNamed(context, '/residenthome');
-      } else {
-        print('Error: ${response.statusCode}');
-        print('Mensaje: ${response.body}');
+      } else if (response.statusCode == 401) {
+        Fluttertoast.showToast(
+          msg: "Credenciales Inválidas",
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.black,
+        );
       }
     } catch (error) {
-      print('Error de conexion: $error');
+      Fluttertoast.showToast(
+        msg: "Error de conexión $error",
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.black,
+      );
     }
   }
 

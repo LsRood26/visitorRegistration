@@ -23,7 +23,6 @@ class _ResidentHomeState extends State<ResidentHome>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    print('Hola');
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<ProviderRequests>(context, listen: false)
           .fetchRequests(context);
@@ -35,14 +34,6 @@ class _ResidentHomeState extends State<ResidentHome>
     _tabController.dispose();
     super.dispose();
   }
-
-  /* @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    print('Hola');
-    Provider.of<ProviderRequests>(context, listen: false)
-        .fetchRequests(context);
-  } */
 
   @override
   Widget build(BuildContext context) {
@@ -77,7 +68,7 @@ class _ResidentHomeState extends State<ResidentHome>
               onPressed: () {
                 Navigator.pushNamed(context, '/newvisit');
               },
-              child: Row(
+              child: const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   Icon(
@@ -92,17 +83,10 @@ class _ResidentHomeState extends State<ResidentHome>
               ),
             ),
           ),
-          /* IconButton(
-            onPressed: () {
-              requestProvider.fetchRequests(context);
-            },
-            icon: Icon(Icons.abc),
-          ), */
           SizedBox(
             height: size.height * 0.03,
           ),
-          Container(
-              //color: Colors.amber,
+          SizedBox(
               height: size.height * 0.75,
               width: size.width * 1,
               child: registervisitors(size, _tabController, requestProvider)),
@@ -161,7 +145,6 @@ Widget registervisitors(
           controller: controller,
           children: [
             Container(
-              //color: Colors.purple,
               height: size.height * 0.6,
               child: filteredRequests.isEmpty
                   ? Center(
@@ -173,12 +156,11 @@ Widget registervisitors(
                         final request = filteredRequests[index];
                         return GestureDetector(
                           onLongPress: () {
-                            print('JOJO');
                             showDialog(
                               context: context,
                               builder: (BuildContext context) {
                                 return AlertDialog(
-                                  title: Text(
+                                  title: const Text(
                                       'Esta seguro de eliminar la solicitud?'),
                                   actions: [
                                     IconButton(
@@ -187,13 +169,13 @@ Widget registervisitors(
                                             request.id.toString(), context);
                                         provider.fetchRequests(context);
                                       },
-                                      icon: Icon(Icons.check),
+                                      icon: const Icon(Icons.check),
                                     ),
                                     IconButton(
                                       onPressed: () {
                                         Navigator.pop(context);
                                       },
-                                      icon: Icon(Icons.close),
+                                      icon: const Icon(Icons.close),
                                     ),
                                   ],
                                 );
@@ -213,7 +195,6 @@ Widget registervisitors(
                                     provider.request = request;
                                     provider.setRequest();
                                     Navigator.pushNamed(context, '/newvisit');
-                                    print('Editando');
                                   },
                                   child: Icon(Icons.edit)),
                             ),
@@ -257,26 +238,80 @@ Widget registervisitors(
 void showDetailsDialog(BuildContext context, CustomRequests request, Size size,
     ProviderRequests provider) {
   String base64Image = request.photo;
-  print(' base641 $base64Image');
   String base64String = base64Image.split(',').last;
-  print(' base642 $base64String');
   Uint8List bytes = base64Decode(base64String);
-  print('bytes $bytes');
   showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Detalles de visitante'),
+          title: const Text('Detalles de visitante'),
           content: Container(
             height: size.height * 0.3,
             child: Column(
               children: [
-                Text('${request.visitorName}'),
-                Text('${request.visitorDNI}'),
-                Text('${request.residentDNI}'),
-                Text('${request.datetime}'),
-                Text('${request.transportMode}'),
-                Text('${request.status}'),
+                Row(
+                  children: [
+                    const Text(
+                      'Nombre del visitante: ',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text('${request.visitorName} ${request.visitorLastname}'),
+                  ],
+                ),
+                Row(
+                  children: [
+                    const Text(
+                      'Cedula visitante: ',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text('${request.visitorDNI}'),
+                  ],
+                ),
+                Row(
+                  children: [
+                    const Text(
+                      'Cedula residente: ',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text('${request.residentDNI}'),
+                  ],
+                ),
+                Row(
+                  children: [
+                    const Text(
+                      'Fecha y Hora: ',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text('${request.datetime}'),
+                  ],
+                ),
+                Row(
+                  children: [
+                    const Text(
+                      'Medio de ingreso: ',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    //Text('${request.transportMode}'),
+                    Text(request.transportMode == 'car'
+                        ? 'Vehiculo'
+                        : 'Caminando'),
+                  ],
+                ),
+                Row(
+                  children: [
+                    const Text(
+                      'Estado de solicitud: ',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    Text(request.status == 'pending'
+                        ? 'Pendiente'
+                        : request.status == 'accepted'
+                            ? 'Aceptado'
+                            : 'Denegado'),
+                  ],
+                ),
                 Image(
                   image: MemoryImage(bytes),
                   width: size.width * 0.3,
@@ -287,7 +322,10 @@ void showDetailsDialog(BuildContext context, CustomRequests request, Size size,
             ),
           ),
           actions: [
-            Text('Aceptar visita?'),
+            const Text(
+              'Aceptar visita?',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             IconButton(
                 onPressed: () async {
                   provider.status = 'accepted';
@@ -295,7 +333,7 @@ void showDetailsDialog(BuildContext context, CustomRequests request, Size size,
                   provider.fetchRequests(context);
                   Navigator.pop(context);
                 },
-                icon: Icon(Icons.check)),
+                icon: const Icon(Icons.check)),
             IconButton(
                 onPressed: () async {
                   provider.status = 'rejected';
@@ -303,199 +341,8 @@ void showDetailsDialog(BuildContext context, CustomRequests request, Size size,
                   provider.fetchRequests(context);
                   Navigator.pop(context);
                 },
-                icon: Icon(Icons.close))
+                icon: const Icon(Icons.close))
           ],
         );
-      });
-}
-
-Widget pendingvisitors(Size size, BuildContext context, CustomRequests request,
-    ProviderRequests provider) {
-  return FutureBuilder(
-      future: provider.fetchVisitorDetails(context),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return ListTile(
-            title: Text('Cargando detalles'),
-            subtitle: Text('Fecha: ${request.datetime}'),
-          );
-        } else if (snapshot.hasError) {
-          return ListTile(
-            title: Text('Error al cargar los detalles'),
-            subtitle: Text('Fecha: ${request.datetime}'),
-          );
-        } else {
-          final name = snapshot.data!['name']!;
-          final lastname = snapshot.data!['lastname']!;
-
-          return ListTile(
-            title: Text('Visitante: $name $lastname'),
-            subtitle: Text('Fecha: ${request.datetime}'),
-            trailing: IconButton(
-                onPressed: () {
-                  print('Editando');
-                },
-                icon: Icon(Icons.edit)),
-          );
-        }
-      });
-}
-
-Widget previousvisitors(Size size, BuildContext context) {
-  return GestureDetector(
-    onTap: () {
-      print('Informacion de la visita previa der John');
-      showPreviousVisits(context, size);
-    },
-    child: const Card(
-      child: ListTile(
-        title: Text('John Doe'),
-        subtitle: Text('10-20-2024 07:30'),
-        trailing: Icon(Icons.check),
-      ),
-    ),
-  );
-}
-
-Future<String> fetchData() async {
-  await Future.delayed(Duration(seconds: 2));
-  return 'Datos cargados';
-}
-
-void showPendingVisits(
-    BuildContext context, Size size /* , Provider provider */) {
-  showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return FutureBuilder(
-            future: fetchData(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return AlertDialog(
-                  title: Text('Cargando...'),
-                  content: Container(
-                    height: size.height * 0.5,
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-                );
-              } else if (snapshot.hasError) {
-                return AlertDialog(
-                  title: Text('Error'),
-                  content: Container(
-                      height: size.height * 0.4,
-                      child: Text('No se puede mostrar la informacion')),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text('Cerrar'),
-                    ),
-                  ],
-                );
-              } else {
-                return AlertDialog(
-                  title: Text('Detalles de solicitud'),
-                  content: Container(
-                    height: size.height * 0.43,
-                    child: Column(
-                      children: [
-                        Text('Nombres visitantes'),
-                        Text('Jane Doe'),
-                        Text('Cedula visitantes'),
-                        Text('1312788357'),
-                        Text('Fecha y Hora de visita'),
-                        Text('11/1/2024 - 09:00 AM'),
-                        Text('Medio de ingreso'),
-                        Text('Vehiculo'),
-                        Image(
-                          fit: BoxFit.contain,
-                          image: NetworkImage(
-                              'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTi1Z4Y2EHenGzuEOmPVPMBulMIVYI-xdpIxA&s'),
-                        ),
-                      ],
-                    ),
-                  ),
-                  actions: [
-                    Text('Aprobar visita?'),
-                    IconButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      icon: Icon(Icons.check),
-                    ),
-                    IconButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        icon: Icon(Icons.close))
-                  ],
-                );
-              }
-            });
-      });
-}
-
-void showPreviousVisits(
-    BuildContext context, Size size /* , Provider provider */) {
-  showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return FutureBuilder(
-            future: fetchData(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return AlertDialog(
-                  title: Text('Cargando...'),
-                  content: Container(
-                    height: size.height * 0.45,
-                    child: Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                  ),
-                );
-              } else if (snapshot.hasError) {
-                return AlertDialog(
-                  title: Text('Error'),
-                  content: Container(
-                      height: size.height * 0.4,
-                      child: Text('No se puede mostrar la informacion')),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: Text('Cerrar'),
-                    ),
-                  ],
-                );
-              } else {
-                return AlertDialog(
-                  title: Text('Detalles de solicitud'),
-                  content: Container(
-                    height: size.height * 0.4,
-                    child: Column(
-                      children: [
-                        Text('Nombres visitantes'),
-                        Text('Jane Doe'),
-                        Text('Cedula visitantes'),
-                        Text('1312788357'),
-                        Text('Fecha y Hora de visita'),
-                        Text('11/1/2024 - 09:00 AM'),
-                        Text('Medio de ingreso'),
-                        Text('Vehiculo'),
-                        Image(
-                          fit: BoxFit.contain,
-                          image: NetworkImage(
-                              'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTi1Z4Y2EHenGzuEOmPVPMBulMIVYI-xdpIxA&s'),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              }
-            });
       });
 }

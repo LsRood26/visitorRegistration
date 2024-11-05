@@ -123,7 +123,6 @@ class _NewVisitState extends State<NewVisit> {
                         onChanged: (MetodoIngreso? value) {
                           setState(() {
                             _metodoSeleccionado = value;
-                            print(_metodoSeleccionado);
                           });
                         }),
                   ),
@@ -141,7 +140,6 @@ class _NewVisitState extends State<NewVisit> {
                         onChanged: (MetodoIngreso? value) {
                           setState(() {
                             _metodoSeleccionado = value;
-                            print(_metodoSeleccionado);
                           });
                         }),
                   ),
@@ -199,7 +197,6 @@ class _NewVisitState extends State<NewVisit> {
             } else {
               entry = "walk";
             }
-
             await provider.registerVisit(context, provider, entry);
 
             provider.cleanInputs();

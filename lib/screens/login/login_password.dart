@@ -27,7 +27,7 @@ class _LoginPageState extends State<LoginPasswordPage> {
           children: [
             Column(
               children: [
-                Icon(Icons.ac_unit_sharp),
+                Icon(Icons.location_city),
                 Text('Urbanización'),
               ],
             ),
@@ -46,6 +46,7 @@ class _LoginPageState extends State<LoginPasswordPage> {
               ),
             ),
             Container(
+              width: size.width * 0.5,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
                 color: Colors.purple,
@@ -62,7 +63,7 @@ class _LoginPageState extends State<LoginPasswordPage> {
                   });
                 },
                 child: Text(
-                  'Iniciar Sesion',
+                  'Iniciar Sesión',
                   style: TextStyle(color: Colors.white),
                 ),
               ),

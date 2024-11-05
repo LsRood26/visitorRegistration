@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -40,10 +39,18 @@ class ProviderRequests with ChangeNotifier {
         _requests = data.map((json) => CustomRequests.fromMap(json)).toList();
         notifyListeners();
       } else {
-        _errorMessage = 'Error al cargar las visitas';
+        Fluttertoast.showToast(
+          msg: "Error al obtener solicitudes",
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.black,
+        );
       }
     } catch (e) {
-      print('error : $e');
+      Fluttertoast.showToast(
+        msg: "Error $e",
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.black,
+      );
     } finally {
       notifyListeners();
     }
@@ -53,20 +60,30 @@ class ProviderRequests with ChangeNotifier {
     final tokenProvider = Provider.of<ProviderLogin>(context, listen: false);
     final token = tokenProvider.token;
     try {
-      print(id);
       final response = await http
           .delete(Uri.parse('http://10.0.2.2:3000/request/$id'), headers: {
         'Authorization': 'Bearer $token',
       });
-      print(response.statusCode);
       if (response.statusCode == 200) {
-        print('Registro Eliminado');
+        Fluttertoast.showToast(
+          msg: "Actualizacion realizado exitosamente",
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.black,
+        );
         Navigator.pop(context);
       } else {
-        print('Error');
+        Fluttertoast.showToast(
+          msg: "Error al eliminar el registro",
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.black,
+        );
       }
     } catch (error) {
-      print('error: $error');
+      Fluttertoast.showToast(
+        msg: "Error $error",
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.black,
+      );
     }
   }
 
@@ -80,17 +97,12 @@ class ProviderRequests with ChangeNotifier {
     if (provider.image != null) {
       List<int>? imageBytes = await provider.image!.readAsBytes();
       base64imagen = base64Encode(imageBytes);
-      print(base64imagen);
     }
     try {
       final Map<String, String> header = {
         'Authorization': 'Bearer $token',
         "Content-Type": "application/json"
       };
-      print("Resident: ${provider.dniresidentController.text}");
-      print("Visitor: ${provider.dnivisitorController.text}");
-      print("Block: ${provider.blockController.text}");
-      print("Villa: ${provider.villaController.text}");
 
       final Map<String, dynamic> body = {
         "datetime": "$date+$time",
@@ -101,22 +113,32 @@ class ProviderRequests with ChangeNotifier {
         "villa": provider.villaController.text,
         "photo": base64imagen,
       };
-      print(body);
       final response = await http.post(
           Uri.parse('http://10.0.2.2:3000/request/'),
           headers: header,
           body: jsonEncode(body));
-      //print(response);
-      print(response.body);
+
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print('Datos enviados correctamente');
+        Fluttertoast.showToast(
+          msg: "Registro actualizado exitosamente",
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.black,
+        );
         return true;
       } else {
-        print('Error al enviar los datos');
+        Fluttertoast.showToast(
+          msg: " Error al enviar los datos ",
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.black,
+        );
         return false;
       }
     } catch (error) {
-      print('Error: $error');
+      Fluttertoast.showToast(
+        msg: "Error $error",
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.black,
+      );
       return false;
     }
   }
@@ -130,11 +152,14 @@ class ProviderRequests with ChangeNotifier {
           'Content-Type': 'application/json'
         },
       );
-      print('persona: $response.body');
       if (response.statusCode == 200) {
         _visitorInfo = json.decode(response.body);
       } else {
-        _errorMessage = 'Error al obtener informacion';
+        Fluttertoast.showToast(
+          msg: "Error al consultar usuario",
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.black,
+        );
       }
     } catch (e) {
       _errorMessage = 'Error de conexion: $e';
@@ -169,10 +194,13 @@ class ProviderRequests with ChangeNotifier {
           gravity: ToastGravity.BOTTOM,
           backgroundColor: Colors.black,
         );
-        print('Visita actualizada');
         status = "";
       } else {
-        print('Error');
+        Fluttertoast.showToast(
+          msg: "Actualizacion fallida",
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.black,
+        );
       }
     } catch (e) {
       throw Exception('Fallo $e');
