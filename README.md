@@ -1,16 +1,7 @@
 # visitorregistration
 
-A new Flutter project.
+Aplicativo para registro de visitas para urbanizacion, inicio por cedula y contraseña para usuarios previamente registrados en la base de datos(PostgreSql).
 
-## Getting Started
+Los usuarios visitantes pueden solicitar visitas solo a usuarios residentes, pero deben esperar a ser aprobadas o rechazadas por el usuario residente.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Los usuarios residentes y visitantes pueden ver una lista de las solicitudes pendientes. Para los residentes, interactuar con las mismas les permite ver los detalles de la solicitud y aceptarla o rechazarla, acorde a lo necesario.
