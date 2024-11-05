@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:visitorregistration/providers/provider_login.dart';
+import 'package:visitorregistration/services/auth_service.dart';
 
 class LoginPasswordPage extends StatefulWidget {
   const LoginPasswordPage({super.key});
@@ -12,8 +13,10 @@ class LoginPasswordPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPasswordPage> {
   @override
   Widget build(BuildContext context) {
+    bool isLoading = false;
     final size = MediaQuery.of(context).size;
     final provider = Provider.of<ProviderLogin>(context);
+    final AuthService service = AuthService();
     return Scaffold(
       body: Container(
         width: size.width * 1,
@@ -49,8 +52,14 @@ class _LoginPageState extends State<LoginPasswordPage> {
               ),
               child: TextButton(
                 onPressed: () {
-                  //Navigator.pushNamed(context, '/residenthome');
-                  Navigator.pushNamed(context, '/visitorhome');
+                  setState(() {
+                    isLoading = true;
+                  });
+                  service.login(provider.dniController.text,
+                      int.parse(provider.passwordController.text), context);
+                  setState(() {
+                    isLoading = false;
+                  });
                 },
                 child: Text(
                   'Iniciar Sesion',

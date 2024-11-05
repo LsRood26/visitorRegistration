@@ -14,4 +14,9 @@ class ProviderLogin with ChangeNotifier {
     _passwordController = value;
     notifyListeners();
   }
+
+  cleanInputs() {
+    _dniController.text = "";
+    _passwordController.text = "";
+  }
 }

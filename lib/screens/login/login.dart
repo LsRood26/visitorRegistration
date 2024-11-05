@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:visitorregistration/services/auth_service.dart';
 
 class LoginOptionsPage extends StatefulWidget {
   const LoginOptionsPage({super.key});
@@ -11,6 +12,7 @@ class _LoginOptionsPageState extends State<LoginOptionsPage> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
+
     return Scaffold(
       body: Container(
         width: size.width * 1,
