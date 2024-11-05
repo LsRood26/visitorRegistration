@@ -29,7 +29,7 @@ class ProviderRequests with ChangeNotifier {
     final token = tokenProvider.token;
     try {
       final response = await http.get(
-          Uri.parse('http://10.0.2.2:3000/request/user-requests'),
+          Uri.parse('http://localhost:3000/request/user-requests'),
           headers: {
             'Authorization': 'Bearer $token',
             'Content-Type': 'application/json'
@@ -61,7 +61,7 @@ class ProviderRequests with ChangeNotifier {
     final token = tokenProvider.token;
     try {
       final response = await http
-          .delete(Uri.parse('http://10.0.2.2:3000/request/$id'), headers: {
+          .delete(Uri.parse('http://localhost:3000/request/$id'), headers: {
         'Authorization': 'Bearer $token',
       });
       if (response.statusCode == 200) {
@@ -114,7 +114,7 @@ class ProviderRequests with ChangeNotifier {
         "photo": base64imagen,
       };
       final response = await http.post(
-          Uri.parse('http://10.0.2.2:3000/request/'),
+          Uri.parse('http://localhost:3000/request/'),
           headers: header,
           body: jsonEncode(body));
 
@@ -146,7 +146,7 @@ class ProviderRequests with ChangeNotifier {
   Future<void> fetchUserById(String id, String token) async {
     try {
       final response = await http.get(
-        Uri.parse('http://10.0.2.2:3000/user/{$id}'),
+        Uri.parse('http://localhost:3000/user/{$id}'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json'
@@ -180,7 +180,7 @@ class ProviderRequests with ChangeNotifier {
     final String jsonData = json.encode(newData);
     try {
       final response = await http.patch(
-        Uri.parse('http://10.0.2.2:3000/request'),
+        Uri.parse('http://localhost:3000/request'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',

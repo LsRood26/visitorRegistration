@@ -11,7 +11,7 @@ class AuthService {
 
   Future<void> login(String dni, String password, BuildContext context) async {
     final provider = Provider.of<ProviderLogin>(context, listen: false);
-    final url = Uri.parse('http://10.0.2.2:3000/auth/login');
+    final url = Uri.parse('http://localhost:3000/auth/login');
 
     try {
       final response = await http.post(
