@@ -127,7 +127,7 @@ Widget registervisitors(
               child: Wrap(
                 children: [
                   Text(
-                    'Solicitudes de visitas pendientes',
+                    'Solicitudes de visita pendientes',
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -168,7 +168,7 @@ Widget registervisitors(
                               builder: (BuildContext context) {
                                 return AlertDialog(
                                   title: const Text(
-                                      'Esta seguro de eliminar la solicitud?'),
+                                      '¿Estas seguro de eliminar la solicitud?'),
                                   actions: [
                                     IconButton(
                                       onPressed: () async {
@@ -202,7 +202,6 @@ Widget registervisitors(
                                   onTap: () {
                                     provider.request = request;
                                     provider.setRequest();
-                                    print('FECHA ${request.datetime}');
                                     Navigator.pushNamed(context, '/newvisit',
                                         arguments: user);
                                   },
@@ -255,7 +254,7 @@ void showDetailsDialog(BuildContext context, CustomRequests request, Size size,
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Detalles de visitante'),
+          title: const Text('Detalles del visitante'),
           content: Container(
             height: size.height * 0.3,
             child: Column(
@@ -263,9 +262,9 @@ void showDetailsDialog(BuildContext context, CustomRequests request, Size size,
               children: [
                 textTitle('Nombre del visitante: ',
                     '${request.visitorName} ${request.visitorLastname}'),
-                textTitle('Cedula visitante: ', '${request.visitorDNI}'),
-                textTitle('Cedula residente: ', '${request.residentDNI}'),
-                textTitle('Fecha y Hora: ', '${request.datetime}'),
+                textTitle('Cedula del visitante: ', '${request.visitorDNI}'),
+                textTitle('Cedula del residente: ', '${request.residentDNI}'),
+                textTitle('Fecha y Hora de visita: ', '${request.datetime}'),
                 textTitle('Medio de ingreso: ',
                     request.transportMode == 'car' ? 'Vehiculo' : 'Caminando'),
                 textTitle(
@@ -290,7 +289,7 @@ void showDetailsDialog(BuildContext context, CustomRequests request, Size size,
             if (request.status == constants.PENDING &&
                 user.role.id == constants.ID_RESIDENTE) ...[
               const Text(
-                'Aceptar visita?',
+                '¿Aceptar visita?',
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               IconButton(

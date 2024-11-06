@@ -24,7 +24,7 @@ class _LoginOptionsPageState extends State<LoginOptionsPage> {
                 onTap: () {
                   Navigator.pushNamed(context, '/loginpassword');
                 },
-                child: loginOption('Ingreso con Cedula y Contraseña',
+                child: loginOption('Ingreso con Cédula y Contraseña',
                     Icon(Icons.people), size)),
           ],
         ),

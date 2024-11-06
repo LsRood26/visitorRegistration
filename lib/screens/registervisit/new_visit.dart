@@ -103,7 +103,7 @@ class _NewVisitState extends State<NewVisit> {
               children: [
                 radioSelection(size, handleSetMethod, 'Caminando',
                     MetodoIngreso.walk, _metodoSeleccionado!),
-                radioSelection(size, handleSetMethod, 'Con Vehiculo',
+                radioSelection(size, handleSetMethod, 'Con Vehículo',
                     MetodoIngreso.car, _metodoSeleccionado!),
               ],
             ),
