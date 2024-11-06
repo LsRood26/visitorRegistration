@@ -13,7 +13,6 @@ class LoginPasswordPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPasswordPage> {
   @override
   Widget build(BuildContext context) {
-    bool isLoading = false;
     final size = MediaQuery.of(context).size;
     final provider = Provider.of<ProviderLogin>(context);
     final AuthService service = AuthService();
@@ -53,14 +52,8 @@ class _LoginPageState extends State<LoginPasswordPage> {
               ),
               child: TextButton(
                 onPressed: () {
-                  setState(() {
-                    isLoading = true;
-                  });
                   service.login(provider.dniController.text,
                       provider.passwordController.text, context);
-                  setState(() {
-                    isLoading = false;
-                  });
                 },
                 child: Text(
                   'Iniciar Sesión',
