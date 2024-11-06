@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class HttpClient {
   static final HttpClient _instance = HttpClient._internal();
-  String baseUrl = 'http://10.0.2.2:3000';
+  String baseUrl = 'http://localhost:3000';
   String? _token;
 
   HttpClient._internal();
