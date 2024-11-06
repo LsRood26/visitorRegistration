@@ -27,12 +27,7 @@ class _LoginPageState extends State<LoginPasswordPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Column(
-                children: [
-                  Icon(Icons.location_city),
-                  Text('Urbanización'),
-                ],
-              ),
+              titles('Urbanizacion ', 'Registro de visitas'),
               Container(
                 width: size.width * 0.5,
                 child: TextFormField(
@@ -85,4 +80,22 @@ class _LoginPageState extends State<LoginPasswordPage> {
       ),
     );
   }
+}
+
+Widget titles(String urbName, String text) {
+  return Column(
+    children: [
+      const Icon(Icons.location_city),
+      Text(
+        urbName,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      Text(text,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+          )),
+    ],
+  );
 }

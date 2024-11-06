@@ -264,7 +264,7 @@ void showDetailsDialog(BuildContext context, CustomRequests request, Size size,
                     '${request.visitorName} ${request.visitorLastname}'),
                 textTitle('Cedula del visitante: ', '${request.visitorDNI}'),
                 textTitle('Cedula del residente: ', '${request.residentDNI}'),
-                textTitle('Fecha y Hora de visita: ', '${request.datetime}'),
+                textTitle('Fecha y Hora visita: ', '${request.datetime}'),
                 textTitle('Medio de ingreso: ',
                     request.transportMode == 'car' ? 'Vehiculo' : 'Caminando'),
                 textTitle(
