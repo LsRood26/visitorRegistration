@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import 'package:visitorregistration/providers/provider_login.dart';
+import 'package:visitorregistration/models/users.dart';
 import 'dart:io';
 
 import 'package:visitorregistration/providers/provider_visits.dart';
+import 'package:visitorregistration/utils/constants.dart';
 
 enum MetodoIngreso { walk, car }
 
@@ -18,13 +19,17 @@ class NewVisit extends StatefulWidget {
 class _NewVisitState extends State<NewVisit> {
   MetodoIngreso? _metodoSeleccionado = MetodoIngreso.walk;
 
+  handleSetMethod(MetodoIngreso method) => setState(() {
+        _metodoSeleccionado = method;
+      });
+
   @override
   Widget build(BuildContext context) {
-    //String usertype = 'visitante';
     String entry = "";
     final size = MediaQuery.of(context).size;
     ProviderRequests provider = Provider.of<ProviderRequests>(context);
-    ProviderLogin providerauth = Provider.of<ProviderLogin>(context);
+    final User user = ModalRoute.of(context)!.settings.arguments as User;
+    Constants constants = Constants();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -88,65 +93,21 @@ class _NewVisitState extends State<NewVisit> {
                     controller: provider.timevisitController,
                   ),
                 ),
-                /* TextButton(
-                  onPressed: () {
-                    selectTime(context, provider);
-                  },
-                  child: Container(
-                      padding: EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                          color: Colors.purple,
-                          borderRadius: BorderRadius.circular(12)),
-                      child: Text(
-                        'Hora de visita',
-                        style: TextStyle(color: Colors.white),
-                      )),
-                ), */
               ],
             ),
-            Text(
+            const Text(
               'Medio de ingreso',
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             Row(
               children: [
-                Container(
-                  width: size.width * 0.5,
-                  child: ListTile(
-                    title: Text(
-                      'Caminando',
-                      style: TextStyle(fontSize: size.height * 0.018),
-                    ),
-                    leading: Radio(
-                        value: MetodoIngreso.walk,
-                        groupValue: _metodoSeleccionado,
-                        onChanged: (MetodoIngreso? value) {
-                          setState(() {
-                            _metodoSeleccionado = value;
-                          });
-                        }),
-                  ),
-                ),
-                Container(
-                  width: size.width * 0.5,
-                  child: ListTile(
-                    title: Text(
-                      'Con vehiculo',
-                      style: TextStyle(fontSize: size.height * 0.018),
-                    ),
-                    leading: Radio(
-                        value: MetodoIngreso.car,
-                        groupValue: _metodoSeleccionado,
-                        onChanged: (MetodoIngreso? value) {
-                          setState(() {
-                            _metodoSeleccionado = value;
-                          });
-                        }),
-                  ),
-                ),
+                radioSelection(size, handleSetMethod, 'Caminando',
+                    MetodoIngreso.walk, _metodoSeleccionado!),
+                radioSelection(size, handleSetMethod, 'Con Vehiculo',
+                    MetodoIngreso.car, _metodoSeleccionado!),
               ],
             ),
-            if (providerauth.getrole == "visitante" &&
+            if (user.role.id == constants.ID_VISITANTE &&
                 _metodoSeleccionado == MetodoIngreso.car) ...[
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -217,7 +178,6 @@ class _NewVisitState extends State<NewVisit> {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      //provider.image = File(pickedFile.path);
       setState(() {
         provider.image = File(pickedFile.path);
       });
@@ -261,4 +221,23 @@ Future<void> selectTime(BuildContext context, ProviderRequests provider) async {
   if (pickedTime != null) {
     provider.timevisitController.text = pickedTime.format(context);
   }
+}
+
+Widget radioSelection(Size size, Function func, String text,
+    MetodoIngreso method, MetodoIngreso selectedmethod) {
+  return Container(
+    width: size.width * 0.5,
+    child: ListTile(
+      title: Text(
+        text,
+        style: TextStyle(fontSize: size.height * 0.018),
+      ),
+      leading: Radio(
+          value: method,
+          groupValue: selectedmethod,
+          onChanged: (MetodoIngreso? value) {
+            func(value);
+          }),
+    ),
+  );
 }

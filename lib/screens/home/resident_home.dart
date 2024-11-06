@@ -4,9 +4,11 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:visitorregistration/models/requests.dart';
-import 'package:visitorregistration/providers/provider_login.dart';
+import 'package:visitorregistration/models/users.dart';
 import 'package:visitorregistration/providers/provider_visits.dart';
 import 'package:visitorregistration/services/auth_service.dart';
+import 'package:visitorregistration/services/http_client.dart';
+import 'package:visitorregistration/utils/constants.dart';
 
 class ResidentHome extends StatefulWidget {
   const ResidentHome({super.key});
@@ -24,8 +26,10 @@ class _ResidentHomeState extends State<ResidentHome>
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<ProviderRequests>(context, listen: false)
-          .fetchRequests(context);
+      if (HttpClient().getToken() != null) {
+        Provider.of<ProviderRequests>(context, listen: false)
+            .fetchRequests(context);
+      }
     });
   }
 
@@ -37,15 +41,16 @@ class _ResidentHomeState extends State<ResidentHome>
 
   @override
   Widget build(BuildContext context) {
+    final User user = ModalRoute.of(context)!.settings.arguments as User;
     final AuthService service = AuthService();
     final size = MediaQuery.of(context).size;
     final requestProvider = Provider.of<ProviderRequests>(context);
-    final authprovider = Provider.of<ProviderLogin>(context);
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: Text('Bienvenido, ${authprovider.getname}'),
+        title: Text('Bienvenido, ${user.name} ${user.lastName}'),
         automaticallyImplyLeading: false,
         actions: [
           IconButton(
@@ -66,7 +71,7 @@ class _ResidentHomeState extends State<ResidentHome>
                 color: Colors.purple, borderRadius: BorderRadius.circular(12)),
             child: TextButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/newvisit');
+                Navigator.pushNamed(context, '/newvisit', arguments: user);
               },
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -89,7 +94,8 @@ class _ResidentHomeState extends State<ResidentHome>
           SizedBox(
               height: size.height * 0.75,
               width: size.width * 1,
-              child: registervisitors(size, _tabController, requestProvider)),
+              child: registervisitors(
+                  size, _tabController, requestProvider, user)),
         ],
       ),
     );
@@ -97,14 +103,15 @@ class _ResidentHomeState extends State<ResidentHome>
 }
 
 Widget registervisitors(
-    Size size, TabController controller, ProviderRequests provider) {
-  String filterPending = 'pending';
-
+    Size size, TabController controller, ProviderRequests provider, User user) {
+  Constants constants = Constants();
   List<CustomRequests> allRequests = provider.requests;
-  List<CustomRequests> filteredRequests =
-      allRequests.where((request) => request.status == filterPending).toList();
-  List<CustomRequests> remainingRequest =
-      allRequests.where((request) => request.status != filterPending).toList();
+  List<CustomRequests> filteredRequests = allRequests
+      .where((request) => request.status == constants.PENDING)
+      .toList();
+  List<CustomRequests> remainingRequest = allRequests
+      .where((request) => request.status != constants.PENDING)
+      .toList();
   return Column(
     children: [
       Container(
@@ -183,7 +190,8 @@ Widget registervisitors(
                             );
                           },
                           onTap: () {
-                            showDetailsDialog(context, request, size, provider);
+                            showDetailsDialog(
+                                context, request, size, provider, user);
                           },
                           child: Card(
                             child: ListTile(
@@ -194,7 +202,9 @@ Widget registervisitors(
                                   onTap: () {
                                     provider.request = request;
                                     provider.setRequest();
-                                    Navigator.pushNamed(context, '/newvisit');
+                                    print('FECHA ${request.datetime}');
+                                    Navigator.pushNamed(context, '/newvisit',
+                                        arguments: user);
                                   },
                                   child: Icon(Icons.edit)),
                             ),
@@ -216,7 +226,7 @@ Widget registervisitors(
                         return GestureDetector(
                           onTap: () {
                             showDetailsDialog(
-                                context, requestpre, size, provider);
+                                context, requestpre, size, provider, user);
                           },
                           child: Card(
                             child: ListTile(
@@ -236,10 +246,11 @@ Widget registervisitors(
 }
 
 void showDetailsDialog(BuildContext context, CustomRequests request, Size size,
-    ProviderRequests provider) {
+    ProviderRequests provider, User user) {
   String base64Image = request.photo;
   String base64String = base64Image.split(',').last;
   Uint8List bytes = base64Decode(base64String);
+  Constants constants = Constants();
   showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -248,101 +259,72 @@ void showDetailsDialog(BuildContext context, CustomRequests request, Size size,
           content: Container(
             height: size.height * 0.3,
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Row(
-                  children: [
-                    const Text(
-                      'Nombre del visitante: ',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text('${request.visitorName} ${request.visitorLastname}'),
-                  ],
-                ),
-                Row(
-                  children: [
-                    const Text(
-                      'Cedula visitante: ',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text('${request.visitorDNI}'),
-                  ],
-                ),
-                Row(
-                  children: [
-                    const Text(
-                      'Cedula residente: ',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text('${request.residentDNI}'),
-                  ],
-                ),
-                Row(
-                  children: [
-                    const Text(
-                      'Fecha y Hora: ',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text('${request.datetime}'),
-                  ],
-                ),
-                Row(
-                  children: [
-                    const Text(
-                      'Medio de ingreso: ',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    //Text('${request.transportMode}'),
-                    Text(request.transportMode == 'car'
-                        ? 'Vehiculo'
-                        : 'Caminando'),
-                  ],
-                ),
-                Row(
-                  children: [
-                    const Text(
-                      'Estado de solicitud: ',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(request.status == 'pending'
+                textTitle('Nombre del visitante: ',
+                    '${request.visitorName} ${request.visitorLastname}'),
+                textTitle('Cedula visitante: ', '${request.visitorDNI}'),
+                textTitle('Cedula residente: ', '${request.residentDNI}'),
+                textTitle('Fecha y Hora: ', '${request.datetime}'),
+                textTitle('Medio de ingreso: ',
+                    request.transportMode == 'car' ? 'Vehiculo' : 'Caminando'),
+                textTitle(
+                    'Estado de solicitud: ',
+                    request.status == constants.PENDING
                         ? 'Pendiente'
-                        : request.status == 'accepted'
+                        : request.status == constants.ACCEPTED
                             ? 'Aceptado'
                             : 'Denegado'),
-                  ],
-                ),
-                Image(
-                  image: MemoryImage(bytes),
-                  width: size.width * 0.3,
-                  height: size.height * 0.15,
-                  fit: BoxFit.cover,
-                ),
+                if (request.photo != '') ...[
+                  Image(
+                    image: MemoryImage(bytes),
+                    width: size.width * 0.3,
+                    height: size.height * 0.15,
+                    fit: BoxFit.cover,
+                  ),
+                ],
               ],
             ),
           ),
           actions: [
-            const Text(
-              'Aceptar visita?',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            IconButton(
-                onPressed: () async {
-                  provider.status = 'accepted';
-                  await provider.updateRequest(provider, context, request);
-                  provider.fetchRequests(context);
-                  Navigator.pop(context);
-                },
-                icon: const Icon(Icons.check)),
-            IconButton(
-                onPressed: () async {
-                  provider.status = 'rejected';
-                  await provider.updateRequest(provider, context, request);
-                  provider.fetchRequests(context);
-                  Navigator.pop(context);
-                },
-                icon: const Icon(Icons.close))
+            if (request.status == constants.PENDING &&
+                user.role.id == constants.ID_RESIDENTE) ...[
+              const Text(
+                'Aceptar visita?',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              IconButton(
+                  onPressed: () async {
+                    await provider.updateRequest(
+                        provider, context, request, constants.ACCEPTED);
+                    provider.fetchRequests(context);
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.check)),
+              IconButton(
+                  onPressed: () async {
+                    await provider.updateRequest(
+                        provider, context, request, constants.REJECTED);
+                    provider.fetchRequests(context);
+                    Navigator.pop(context);
+                  },
+                  icon: const Icon(Icons.close))
+            ]
           ],
         );
       });
+}
+
+Widget textTitle(String title, String subtitle) {
+  return Row(
+    children: [
+      Text(
+        title,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      Text(subtitle),
+    ],
+  );
 }
