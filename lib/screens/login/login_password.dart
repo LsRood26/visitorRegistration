@@ -11,6 +11,7 @@ class LoginPasswordPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPasswordPage> {
+  final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -21,47 +22,65 @@ class _LoginPageState extends State<LoginPasswordPage> {
         width: size.width * 1,
         height: size.height * 1,
         color: Colors.white,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            Column(
-              children: [
-                Icon(Icons.location_city),
-                Text('Urbanización'),
-              ],
-            ),
-            Container(
-              width: size.width * 0.5,
-              child: TextField(
-                controller: provider.dniController,
-                decoration: InputDecoration(hintText: 'Cédula de Identidad'),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              Column(
+                children: [
+                  Icon(Icons.location_city),
+                  Text('Urbanización'),
+                ],
               ),
-            ),
-            Container(
-              width: size.width * 0.5,
-              child: TextField(
-                controller: provider.passwordController,
-                decoration: InputDecoration(hintText: 'Contraseña'),
-              ),
-            ),
-            Container(
-              width: size.width * 0.5,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: Colors.purple,
-              ),
-              child: TextButton(
-                onPressed: () {
-                  service.login(provider.dniController.text,
-                      provider.passwordController.text, context);
-                },
-                child: Text(
-                  'Iniciar Sesión',
-                  style: TextStyle(color: Colors.white),
+              Container(
+                width: size.width * 0.5,
+                child: TextFormField(
+                  controller: provider.dniController,
+                  decoration: InputDecoration(hintText: 'Cédula de Identidad'),
+                  keyboardType: TextInputType.number,
+                  maxLength: 10,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Cédula no valida';
+                    }
+                    if (value.length != 10) {
+                      return 'Cédula no valida';
+                    }
+                    if (!RegExp(r'^\d{10}$').hasMatch(value)) {
+                      return 'La cédula solo debe contener números';
+                    }
+                    return null;
+                  },
                 ),
               ),
-            )
-          ],
+              Container(
+                width: size.width * 0.5,
+                child: TextField(
+                  controller: provider.passwordController,
+                  decoration: InputDecoration(hintText: 'Contraseña'),
+                ),
+              ),
+              Container(
+                width: size.width * 0.5,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.purple,
+                ),
+                child: TextButton(
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {}
+                    service.login(provider.dniController.text,
+                        provider.passwordController.text, context);
+                  },
+                  child: Text(
+                    'Iniciar Sesión',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );
