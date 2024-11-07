@@ -29,8 +29,6 @@ class _ResidentHomeState extends State<ResidentHome>
     _tabController = TabController(length: 2, vsync: this);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (HttpClient().getToken() != null) {
-        /* Provider.of<ProviderRequests>(context, listen: false)
-            .fetchRequests(context); */
         _loadRequest();
       }
     });
@@ -106,12 +104,6 @@ class _ResidentHomeState extends State<ResidentHome>
           SizedBox(
             height: size.height * 0.03,
           ),
-          /* Container(
-              color: Colors.blue,
-              height: size.height * 0.75,
-              width: size.width * 1,
-              child: registervisitors(
-                  size, _tabController, requestProvider, user)), */
           Expanded(
               child: isLoading
                   ? Center(child: CircularProgressIndicator())
@@ -335,8 +327,7 @@ void showDetailsDialog(BuildContext context, CustomRequests request, Size size,
                   onPressed: () async {
                     await petitions.updateRequest(
                         context, request, constants.ACCEPTED);
-                    /* await provider.updateRequest(
-                        provider, context, request, constants.ACCEPTED); */
+
                     await provider.fetchRequests(context);
                     Navigator.pop(context);
                   },
@@ -345,9 +336,6 @@ void showDetailsDialog(BuildContext context, CustomRequests request, Size size,
                   onPressed: () async {
                     await petitions.updateRequest(
                         context, request, constants.REJECTED);
-                    /* await provider.updateRequest(
-                        provider, context, request, constants.REJECTED); */
-                    //petitions.fetchRequests();
                     await provider.fetchRequests(context);
                     Navigator.pop(context);
                   },
