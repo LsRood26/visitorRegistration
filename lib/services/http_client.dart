@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class HttpClient {
   static final HttpClient _instance = HttpClient._internal();
-  String baseUrl = 'http://localhost:3000';
+  String baseUrl = 'http://10.0.2.2:3000';
   String? _token;
 
   HttpClient._internal();
@@ -39,6 +39,7 @@ class HttpClient {
     try {
       final response = await http.get(Uri.parse('$baseUrl$route'),
           headers: await _getHeaders());
+      print('HOLA ${response.body}');
       return _handleResponse(response);
     } catch (error) {
       return _handleError(error);
@@ -96,7 +97,9 @@ class HttpClient {
 
   dynamic _handleResponse(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
-      return jsonDecode(response.body); // Respuesta exitosa
+      print('BODY AL DECODIFICARLO');
+      print(jsonDecode(response.body));
+      return jsonDecode(response.body);
     } else {
       throw Exception('Error ${response.statusCode}: ${response.reasonPhrase}');
     }

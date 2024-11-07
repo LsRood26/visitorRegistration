@@ -8,6 +8,7 @@ import 'package:visitorregistration/models/users.dart';
 import 'package:visitorregistration/providers/provider_visits.dart';
 import 'package:visitorregistration/services/auth_service.dart';
 import 'package:visitorregistration/services/http_client.dart';
+import 'package:visitorregistration/services/petitions.dart';
 import 'package:visitorregistration/utils/constants.dart';
 
 class ResidentHome extends StatefulWidget {
@@ -20,16 +21,30 @@ class ResidentHome extends StatefulWidget {
 class _ResidentHomeState extends State<ResidentHome>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (HttpClient().getToken() != null) {
-        Provider.of<ProviderRequests>(context, listen: false)
-            .fetchRequests(context);
+        /* Provider.of<ProviderRequests>(context, listen: false)
+            .fetchRequests(context); */
+        _loadRequest();
       }
+    });
+  }
+
+  Future<void> _loadRequest() async {
+    setState(() {
+      isLoading = true;
+    });
+    Provider.of<ProviderRequests>(context, listen: false)
+        .fetchRequests(context);
+
+    setState(() {
+      isLoading = false;
     });
   }
 
@@ -71,7 +86,7 @@ class _ResidentHomeState extends State<ResidentHome>
                 color: Colors.purple, borderRadius: BorderRadius.circular(12)),
             child: TextButton(
               onPressed: () {
-                Navigator.pushNamed(context, '/newvisit', arguments: user);
+                Navigator.pushNamed(context, '/newvisit');
               },
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -91,11 +106,17 @@ class _ResidentHomeState extends State<ResidentHome>
           SizedBox(
             height: size.height * 0.03,
           ),
-          SizedBox(
+          /* Container(
+              color: Colors.blue,
               height: size.height * 0.75,
               width: size.width * 1,
               child: registervisitors(
-                  size, _tabController, requestProvider, user)),
+                  size, _tabController, requestProvider, user)), */
+          Expanded(
+              child: isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : registervisitors(
+                      size, _tabController, requestProvider, user)),
         ],
       ),
     );
@@ -112,6 +133,7 @@ Widget registervisitors(
   List<CustomRequests> remainingRequest = allRequests
       .where((request) => request.status != constants.PENDING)
       .toList();
+  PetitionsService _petitions = PetitionsService();
   return Column(
     children: [
       Container(
@@ -172,9 +194,11 @@ Widget registervisitors(
                                   actions: [
                                     IconButton(
                                       onPressed: () async {
-                                        await provider.deleteRequest(
-                                            request.id.toString(), context);
-                                        provider.fetchRequests(context);
+                                        await _petitions.deleteRequest(
+                                            request.id.toString());
+                                        await provider.fetchRequests(context);
+
+                                        Navigator.pop(context);
                                       },
                                       icon: const Icon(Icons.check),
                                     ),
@@ -200,10 +224,24 @@ Widget registervisitors(
                               subtitle: Text('${request.datetime}'),
                               trailing: GestureDetector(
                                   onTap: () {
-                                    provider.request = request;
-                                    provider.setRequest();
                                     Navigator.pushNamed(context, '/newvisit',
-                                        arguments: user);
+                                        arguments: {
+                                          'isEditing': true,
+                                          'userRoleId': user.role.id,
+                                          'id': request.id,
+                                          'datetime': request.datetime,
+                                          'photo': request.photo,
+                                          'status': request.status,
+                                          'transportMode':
+                                              request.transportMode,
+                                          'residentDNI': request.residentDNI,
+                                          'visitorDNI': request.visitorDNI,
+                                          'visitorName': request.visitorName,
+                                          'visitorLastname':
+                                              request.visitorLastname,
+                                          'block': request.block,
+                                          'villa': request.villa,
+                                        });
                                   },
                                   child: Icon(Icons.edit)),
                             ),
@@ -214,7 +252,7 @@ Widget registervisitors(
             ),
             Container(
               height: size.height * 0.6,
-              child: provider.requests.isEmpty
+              child: remainingRequest.isEmpty
                   ? Center(
                       child: Text('No tienes registros de visitas'),
                     )
@@ -250,6 +288,7 @@ void showDetailsDialog(BuildContext context, CustomRequests request, Size size,
   String base64String = base64Image.split(',').last;
   Uint8List bytes = base64Decode(base64String);
   Constants constants = Constants();
+  PetitionsService petitions = PetitionsService();
   showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -294,17 +333,22 @@ void showDetailsDialog(BuildContext context, CustomRequests request, Size size,
               ),
               IconButton(
                   onPressed: () async {
-                    await provider.updateRequest(
-                        provider, context, request, constants.ACCEPTED);
-                    provider.fetchRequests(context);
+                    await petitions.updateRequest(
+                        context, request, constants.ACCEPTED);
+                    /* await provider.updateRequest(
+                        provider, context, request, constants.ACCEPTED); */
+                    await provider.fetchRequests(context);
                     Navigator.pop(context);
                   },
                   icon: const Icon(Icons.check)),
               IconButton(
                   onPressed: () async {
-                    await provider.updateRequest(
-                        provider, context, request, constants.REJECTED);
-                    provider.fetchRequests(context);
+                    await petitions.updateRequest(
+                        context, request, constants.REJECTED);
+                    /* await provider.updateRequest(
+                        provider, context, request, constants.REJECTED); */
+                    //petitions.fetchRequests();
+                    await provider.fetchRequests(context);
                     Navigator.pop(context);
                   },
                   icon: const Icon(Icons.close))
